@@ -1,0 +1,21 @@
+# Ignore AWS credentials and config
+.aws/
+
+# Ignore Go build output
+aws-login
+*.exe
+*.out
+*.test
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore shell history and swap files
+*~
+*.swp
+
+# Ignore log files
+*.log
+
+# Ignore VSCode settings
+.vscode/
