@@ -153,8 +153,16 @@ func main() {
 	}
 	fmt.Println("AWS CLI credentials set from KeyChain.")
 
-	fmt.Println("\n==== AWS Billing for Current Month ====")
-	getBilling()
+	// Check for billing flag: if first argument is "$", check billing
+	checkCost := false
+	if len(os.Args) > 1 && os.Args[1] == "$" {
+		checkCost = true
+	}
+
+	if checkCost {
+		fmt.Println("\n==== AWS Billing for Current Month ====")
+		getBilling()
+	}
 
 	fmt.Println("\n==== S3 Bucket Usage (bytes) ====")
 	getS3Usage()

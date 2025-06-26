@@ -2,7 +2,7 @@
 
 This repo allows you to securely log in to the AWS CLI using credentials stored in the macOS Keychain. Your AWS Access Key ID and Secret Access Key are never stored in plaintext files by the login process.
 
-You can use either the provided Zsh script or the Go app to automate login, check your current AWS billing, and see S3 bucket usage.
+You can use either the provided Zsh script or the Go app to automate login and see S3 bucket usage. Additionally, you can add a "$" option to the command to retrieve your current month's billing.
 
 ## Setup Instructions
 
@@ -35,7 +35,8 @@ You can use either the provided Zsh script or the Go app to automate login, chec
   ```
 - Run:
   ```sh
-  aws-login
+  aws-login           # log in and check S3 only
+  aws-login $         # log in, check S3, and check current month costs
   ```
 
 ---
@@ -50,7 +51,8 @@ You can use either the provided Zsh script or the Go app to automate login, chec
   ```
 - Run:
   ```sh
-  ./aws-login
+  ./aws-login         # log in and check S3 only
+  ./aws-login $       # log in, check S3, and check current month costs
   ```
 
 ---
@@ -73,3 +75,5 @@ You can use either the provided Zsh script or the Go app to automate login, chec
 ---
 
 Feel free to modify the script or Go app for multiple profiles or other customizations as needed.
+
+- By default, only S3 usage is checked. To check billing, add a `$` as the first argument.

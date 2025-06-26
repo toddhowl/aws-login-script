@@ -25,32 +25,40 @@ aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
 
 echo "AWS CLI credentials set from Passwords app."
 
-echo "\n==== AWS Billing for Current Month ===="
-# Get the first day of the current month and today
-START_DATE=$(date +%Y-%m-01)
-END_DATE=$(date -v+1d +%Y-%m-%d)
+# Check if the first argument is '$' (for cost check)
+CHECK_COST=false
+if [[ "$1" == "$" ]]; then
+  CHECK_COST=true
+fi
 
-# Query AWS Cost Explorer for current month's billing (requires permissions)
-BILLING_OUTPUT=$(aws ce get-cost-and-usage \
-  --time-period Start=$START_DATE,End=$END_DATE \
-  --granularity MONTHLY \
-  --metrics "UnblendedCost" \
-  --region us-east-1 \
-  --output json 2>/dev/null)
+if $CHECK_COST; then
+  echo "\n==== AWS Billing for Current Month ===="
+  # Get the first day of the current month and today
+  START_DATE=$(date +%Y-%m-01)
+  END_DATE=$(date -v+1d +%Y-%m-%d)
 
-if [[ -z "$BILLING_OUTPUT" ]]; then
-  echo "(Billing info unavailable: check permissions or Cost Explorer access)"
-else
-  if command -v jq >/dev/null 2>&1; then
-    AMOUNT=$(echo "$BILLING_OUTPUT" | jq -r '.ResultsByTime[0].Total.UnblendedCost.Amount')
-    CURRENCY=$(echo "$BILLING_OUTPUT" | jq -r '.ResultsByTime[0].Total.UnblendedCost.Unit')
-    if [[ -n "$AMOUNT" && -n "$CURRENCY" && "$AMOUNT" != "null" && "$CURRENCY" != "null" ]]; then
-      echo "Current month AWS cost: $AMOUNT $CURRENCY"
-    else
-      echo "(Could not parse billing info)"
-    fi
+  # Query AWS Cost Explorer for current month's billing (requires permissions)
+  BILLING_OUTPUT=$(aws ce get-cost-and-usage \
+    --time-period Start=$START_DATE,End=$END_DATE \
+    --granularity MONTHLY \
+    --metrics "UnblendedCost" \
+    --region us-east-1 \
+    --output json 2>/dev/null)
+
+  if [[ -z "$BILLING_OUTPUT" ]]; then
+    echo "(Billing info unavailable: check permissions or Cost Explorer access)"
   else
-    echo "(jq not found, cannot parse billing info cleanly)"
+    if command -v jq >/dev/null 2>&1; then
+      AMOUNT=$(echo "$BILLING_OUTPUT" | jq -r '.ResultsByTime[0].Total.UnblendedCost.Amount')
+      CURRENCY=$(echo "$BILLING_OUTPUT" | jq -r '.ResultsByTime[0].Total.UnblendedCost.Unit')
+      if [[ -n "$AMOUNT" && -n "$CURRENCY" && "$AMOUNT" != "null" && "$CURRENCY" != "null" ]]; then
+        echo "Current month AWS cost: $AMOUNT $CURRENCY"
+      else
+        echo "(Could not parse billing info)"
+      fi
+    else
+      echo "(jq not found, cannot parse billing info cleanly)"
+    fi
   fi
 fi
 
