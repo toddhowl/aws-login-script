@@ -19,3 +19,7 @@ aws-login
 
 # Ignore VSCode settings
 .vscode/
+
+# Ignore .github
+.github/go.instructions.md
+.github/chatmodes/4.1-Beast.chatmode.md

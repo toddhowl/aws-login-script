@@ -1,79 +1,83 @@
 # AWS CLI Login Script with macOS Keychain (Shell & Go)
 
-This repo allows you to securely log in to the AWS CLI using credentials stored in the macOS Keychain. Your AWS Access Key ID and Secret Access Key are never stored in plaintext files by the login process.
+This project provides two tools for securely logging in to the AWS CLI using credentials stored in the macOS Keychain:
+- `aws-login.sh`: Zsh script for login, S3 usage, and (optionally) billing.
+- `aws-login.go`: Go CLI app with the same functionality.
 
-You can use either the provided Zsh script or the Go app to automate login and see S3 bucket usage. Additionally, you can add a "$" option to the command to retrieve your current month's billing.
+## Features
 
-## Setup Instructions
+- Securely retrieves AWS credentials from the macOS Keychain (never echoes secrets).
+- Sets up AWS CLI credentials for the default profile.
+- Prints S3 bucket usage (total bytes per bucket).
+- Optionally prints current month AWS billing (if you pass `$` as the first argument).
+
+## Setup
 
 ### 1. Add AWS Credentials to Keychain
 
 1. Open **Keychain Access** on your Mac.
 2. Click the **+** button to add a new item.
-3. Set the following fields:
+3. Set:
    - **Keychain**: login
    - **Kind**: Internet password
-   - **Service**: `aws-cli` (this is the most important field; it must match exactly)
+   - **Service**: `aws-cli`
    - **Account**: Your AWS Access Key ID (e.g., `AKIA...`)
    - **Password**: Your AWS Secret Access Key
    - **Where**: (leave blank)
-4. Save the entry.
+4. Save.
 
----
+### 2. Use the Zsh Script
 
-## Option 1: Zsh Script
-
-- Save the `aws-login.sh` script in this directory.
-- Make it executable:
+- **Prerequisite:** `jq` must be installed for billing parsing. Install with:
+  ```sh
+  brew install jq
+  ```
+- Make executable:
   ```sh
   chmod +x /<user>/Documents/Git/aws-login-script/aws-login.sh
   ```
-- Add a shortcut to your `~/.zshrc`:
+- Add to your `~/.zshrc`:
   ```sh
   alias aws-login='zsh /<user>/Documents/Git/aws-login-script/aws-login.sh'
   source ~/.zshrc
   ```
-- Run:
+- Usage:
   ```sh
   aws-login           # log in and check S3 only
   aws-login $         # log in, check S3, and check current month costs
   ```
 
----
+### 3. Use the Go App
 
-## Option 2: Go App
-
-- Make sure you have Go installed (`brew install go` if needed).
-- Build the app:
+- Install Go if needed (`brew install go`).
+- Build:
   ```sh
   cd /<user>/Documents/Git/aws-login-script
   go build -o aws-login aws-login.go
   ```
-- Run:
+- Usage:
   ```sh
   ./aws-login         # log in and check S3 only
   ./aws-login $       # log in, check S3, and check current month costs
   ```
 
----
+## Notes
 
-## What Happens
-- Retrieves your AWS Access Key ID and Secret Access Key from the Keychain.
-- Sets them in your AWS CLI configuration for the default profile.
-- Shows your current month's AWS billing (if you have Cost Explorer permissions).
-- Lists each S3 bucket and displays its total space used in bytes.
+- **Billing API calls may incur AWS charges.** Only run with `$` if you want to check costs.
+- Credentials are only written to `~/.aws/credentials` (standard AWS CLI location).
+- No secrets are ever printed to the terminal.
 
 ## Troubleshooting
-- If you see an error about the Keychain entry not being found, double-check that the **Service** field is exactly `aws-cli` and that the entry is in the **login** keychain.
-- If you see `InvalidAccessKeyId`, verify that your credentials are correct and active in AWS.
+
+- If you see a Keychain error, double-check the Service field is `aws-cli` and the entry is in the login keychain.
+- If you see `InvalidAccessKeyId`, verify your credentials are correct and active in AWS.
 - For billing info, your IAM user must have Cost Explorer permissions and billing access enabled.
 
 ## Security
-- Your credentials are stored securely in the macOS Keychain and never written to disk in plaintext by this script or app.
-- The AWS CLI itself does store credentials in `~/.aws/credentials` in plaintext. Restrict file permissions or remove after use for extra security.
+
+- Credentials are stored securely in the macOS Keychain.
+- The AWS CLI stores credentials in `~/.aws/credentials` in plaintext. Restrict file permissions or remove after use for extra security.
 
 ---
 
-Feel free to modify the script or Go app for multiple profiles or other customizations as needed.
-
-- By default, only S3 usage is checked. To check billing, add a `$` as the first argument.
+Feel free to extend for multiple profiles or other customizations as needed.
